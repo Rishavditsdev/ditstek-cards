@@ -1,0 +1,42 @@
+{
+  "name": "ditstek-cards",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ditstek Cards - a card generator for birthdays, work anniversaries and wedding anniversaries.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "optimize:svgs": "node scripts/optimize-svgs.mjs"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.3",
+    "cropperjs": "1.6.2",
+    "html2canvas": "1.4.1",
+    "next": "16.4.0",
+    "react": "19.3.0",
+    "react-bootstrap": "^2.10.10",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.64.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^24",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.0",
+    "jsdom": "^30.1.2",
+    "sass": "^1.89.0",
+    "sharp": "^0.35.5",
+    "typescript": "^5",
+    "vitest": "^5.0.4"
+  }
+}

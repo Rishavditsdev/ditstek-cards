@@ -1,0 +1,1291 @@
+:root {
+  --ink: #172033;
+  --muted: #667085;
+  --panel: #ffffff;
+  --line: #dce2ec;
+  --blue: #1558c9;
+  --violet: #6548e8;
+  --rose: #d94f7a;
+  --gold: #c78b24;
+  --canvas: #f5f7fb;
+  --shadow-sm: 0 8px 24px rgba(23, 32, 51, 0.06);
+  --shadow-md: 0 18px 42px rgba(23, 32, 51, 0.1);
+
+  // Gallery cards (category and template pages).
+  --radius-card: 22px;
+  --radius-inner: 15px;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --card-shadow:
+    0 1px 2px rgba(23, 32, 51, 0.04), 0 10px 28px -12px rgba(23, 32, 51, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  background: var(--canvas);
+  color: var(--ink);
+  // --font-manrope is provided by next/font in the root layout.
+  font-family: var(--font-manrope), "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+// Soft colour glows behind the page. They live on a fixed layer instead of the
+// body background, which the browser would tile on short pages and leave with
+// visible horizontal seams.
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(
+      44rem 30rem at 4% -6%,
+      rgba(21, 88, 201, 0.11),
+      transparent 70%
+    ),
+    radial-gradient(
+      36rem 28rem at 98% 0%,
+      rgba(101, 72, 232, 0.08),
+      transparent 70%
+    ),
+    radial-gradient(
+      34rem 26rem at 62% 108%,
+      rgba(217, 79, 122, 0.06),
+      transparent 70%
+    );
+  content: "";
+  pointer-events: none;
+}
+
+a {
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.app-navbar {
+  min-height: 76px;
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 4px 18px rgba(23, 32, 51, 0.04);
+  backdrop-filter: blur(14px);
+}
+
+.app-navbar .container {
+  display: flex;
+  align-items: center;
+}
+
+.app-navbar .navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+}
+
+.app-navbar .navbar-brand img {
+  display: block;
+  width: auto;
+  // next/image writes width/height attributes; keep the logo's natural ratio.
+  height: auto;
+  max-width: 150px;
+  max-height: 38px;
+}
+
+.editor-shell {
+  padding: 18px 0;
+}
+
+// Gallery and message pages. The padding is kept modest so a page with a single
+// row of cards fits a laptop-sized window without needing to scroll.
+.section-wrap {
+  padding: clamp(24px, 3.4vw, 44px) 0 clamp(32px, 4vw, 48px);
+}
+
+// Page header: label, title and intro, closed off by a hairline that spans the
+// content width. The text is kept to a readable measure inside it.
+.page-heading {
+  margin-bottom: 32px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--line);
+}
+
+.back-link + .page-heading {
+  margin-top: 24px;
+}
+
+.page-heading h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(32px, 4.4vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.032em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.page-heading p:not(.eyebrow) {
+  max-width: 600px;
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.7;
+  text-wrap: pretty;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 18px;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+// A short rule in front of the label, in place of a boxed badge.
+.eyebrow::before {
+  width: 28px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  content: "";
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px 9px 13px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: 0 1px 2px rgba(23, 32, 51, 0.05);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  backdrop-filter: blur(8px);
+
+  .icon-arrow {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.25s var(--ease-out);
+  }
+
+  &:hover {
+    border-color: rgba(21, 88, 201, 0.4);
+    color: var(--blue);
+
+    .icon-arrow {
+      transform: translateX(-3px);
+    }
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(21, 88, 201, 0.35);
+    outline-offset: 2px;
+  }
+}
+
+// Category and template cards share their surface, shape and motion.
+// `--accent` tints decoration; `--accent-ink` is dark enough for text on white.
+.category-card {
+  --accent: var(--blue);
+  --accent-ink: var(--blue);
+
+  &[data-category="birthday"] {
+    --accent: #e5487f;
+    --accent-ink: #c02463;
+  }
+
+  &[data-category="wedding-anniversary"] {
+    --accent: var(--violet);
+    --accent-ink: var(--violet);
+  }
+}
+
+.category-card,
+.template-card {
+  position: relative;
+  height: 100%;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  transition:
+    transform 0.35s var(--ease-out),
+    border-color 0.35s var(--ease-out),
+    box-shadow 0.35s var(--ease-out);
+
+  &:hover {
+    transform: translateY(-6px);
+  }
+}
+
+.category-card {
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-height: 270px;
+  padding: 30px 30px 24px;
+  overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+
+  // A soft glow in the top corner that brightens on hover.
+  &::before {
+    position: absolute;
+    top: -110px;
+    right: -110px;
+    z-index: -1;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--accent) 24%, transparent),
+      transparent 68%
+    );
+    border-radius: 50%;
+    content: "";
+    opacity: 0.5;
+    transition:
+      opacity 0.4s var(--ease-out),
+      transform 0.6s var(--ease-out);
+  }
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--accent) 50%, var(--line));
+
+    &::before {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+
+    .category-icon {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .category-cta-arrow {
+      background: var(--accent-ink);
+      color: #ffffff;
+      transform: translateX(4px);
+    }
+  }
+
+  &:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    outline-offset: 3px;
+  }
+
+  strong,
+  small {
+    display: block;
+  }
+
+  strong {
+    margin-bottom: 8px;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.022em;
+    line-height: 1.25;
+  }
+
+  small {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+}
+
+.category-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--accent) 16%, #ffffff),
+    color-mix(in srgb, var(--accent) 5%, #ffffff)
+  );
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
+  color: var(--accent-ink);
+  transition:
+    background 0.35s var(--ease-out),
+    box-shadow 0.35s var(--ease-out),
+    color 0.35s var(--ease-out),
+    transform 0.45s var(--ease-out);
+
+  svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .category-initial {
+    font-size: 24px;
+    font-weight: 800;
+  }
+}
+
+// Bottom row of a category card: the prompt on the left, how many templates on the right.
+.category-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 18px;
+  border-top: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+}
+
+.category-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--accent-ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.category-count {
+  padding: 5px 11px;
+  background: #f1f4f9;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.category-cta-arrow {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: color-mix(in srgb, var(--accent) 12%, #ffffff);
+  border-radius: 50%;
+  transition:
+    background 0.3s var(--ease-out),
+    color 0.3s var(--ease-out),
+    transform 0.35s var(--ease-out);
+
+  .icon-arrow {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+.template-card {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+
+  &:hover {
+    border-color: rgba(21, 88, 201, 0.35);
+  }
+
+  // The link is a small button, so mark focus on the whole card it covers.
+  &:has(.template-card-link:focus-visible) {
+    outline: 3px solid rgba(21, 88, 201, 0.4);
+    outline-offset: 3px;
+  }
+
+  .template-card-preview {
+    position: relative;
+    overflow: hidden;
+    background: #eef2f8;
+    border-radius: 8px;
+
+    // A hairline edge so the pale previews stay defined against the card.
+    &::after {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      box-shadow: inset 0 0 0 1px rgba(23, 32, 51, 0.08);
+      content: "";
+      pointer-events: none;
+    }
+
+    img {
+      display: block;
+      width: 100%;
+      // next/image writes width/height attributes; the aspect ratio sizes the box.
+      height: auto;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      background: #eef2f8;
+    }
+  }
+}
+
+.template-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px 12px 12px;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+}
+
+.template-card-description {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.template-card .template-card-link {
+  // Static, so the ::after below is positioned against the card.
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  align-self: flex-start;
+  min-height: 46px;
+  margin-top: auto;
+  padding: 0 22px;
+  background: linear-gradient(135deg, #1d63e0, #1247a8);
+  border: 0;
+  border-radius: 999px;
+  color: #ffffff;
+  white-space: nowrap;
+  transition: box-shadow 0.35s var(--ease-out);
+
+  // Makes the whole card a click target for the link. Keep transform, filter
+  // and similar properties off this element: they would make it the containing
+  // block and shrink the ::after back to the button.
+  &::after {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    content: "";
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: linear-gradient(135deg, #1d63e0, #1247a8);
+    color: #ffffff;
+  }
+
+  // The card draws the focus ring.
+  &:focus-visible {
+    outline: 0;
+  }
+
+  .icon-arrow {
+    width: 17px;
+    height: 17px;
+    transition: transform 0.3s var(--ease-out);
+  }
+}
+
+.empty-state {
+  padding: 32px 24px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-card);
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-card,
+  .category-card *,
+  .template-card,
+  .template-card *,
+  .back-link,
+  .back-link *,
+  .editor-panel,
+  .editor-panel * {
+    transition-duration: 0.01ms !important;
+  }
+
+  .btn-spinner {
+    animation-duration: 2s;
+  }
+
+  .editor-panel .btn-download:hover {
+    transform: none;
+  }
+
+  .category-card:hover,
+  .template-card:hover {
+    transform: none;
+  }
+}
+
+// Editor side panel: a light inspector next to the card. The header names the
+// template, the fields scroll if the window is short, and the download action
+// stays pinned at the bottom.
+.editor-panel {
+  --panel-ink: var(--ink);
+  --panel-muted: var(--muted);
+  --panel-line: var(--line);
+  --panel-focus: var(--blue);
+  --panel-field: #f6f8fc;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      20rem 12rem at 0% 0%,
+      rgba(21, 88, 201, 0.08),
+      transparent 70%
+    ),
+    radial-gradient(
+      18rem 12rem at 100% 0%,
+      rgba(101, 72, 232, 0.06),
+      transparent 70%
+    ),
+    var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  color: var(--panel-ink);
+}
+
+// Beside the card the panel follows the page and starts fully on screen: the
+// window minus the navbar (76px), the shell's top padding (20px) and a margin.
+@media (min-width: 1200px) {
+  .editor-panel {
+    position: sticky;
+    top: 16px;
+    max-height: calc(100vh - 112px);
+    max-height: calc(100dvh - 112px);
+  }
+}
+
+.panel-inner {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  padding: 15px;
+  height: 100vh;
+}
+
+.panel-header {
+  margin-bottom: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--panel-line);
+
+  .back-link {
+    margin-bottom: 18px;
+    padding: 8px 16px 8px 12px;
+    background: var(--panel-field);
+    box-shadow: none;
+    font-size: 13px;
+  }
+
+  .eyebrow {
+    margin-bottom: 12px;
+    font-size: 11.5px;
+  }
+
+  h1 {
+    margin: 0;
+    color: var(--ink);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.022em;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+}
+
+.editor-panel form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+// The side padding leaves room for the focus ring, which the scroll area
+// would otherwise clip. The bottom fade shows there is more to scroll to; it
+// only covers the empty padding once the last field is in view.
+.editor-fields {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0 -6px;
+  padding: 4px 6px 24px;
+  overflow-y: auto;
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent);
+  scrollbar-color: #c3ccdb transparent;
+  scrollbar-width: thin;
+}
+
+.editor-field {
+  margin-bottom: 14px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.editor-panel .form-label {
+  display: block;
+  margin-bottom: 7px;
+  color: #3a4560;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.editor-panel .form-control {
+  min-height: 44px;
+  padding: 10px 14px;
+  background-color: var(--panel-field);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 14.5px;
+  line-height: 1.4;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    background-color: #ffffff;
+    border-color: #b9c4d8;
+  }
+
+  &:focus {
+    background-color: #ffffff;
+    border-color: var(--panel-focus);
+    box-shadow: 0 0 0 4px rgba(21, 88, 201, 0.14);
+    color: var(--ink);
+  }
+
+  &::placeholder {
+    color: #8590a6;
+    opacity: 1;
+  }
+}
+
+.editor-panel textarea.form-control {
+  min-height: 88px;
+  line-height: 1.6;
+  resize: vertical;
+  scrollbar-color: #c3ccdb transparent;
+  scrollbar-width: thin;
+}
+
+// Bootstrap draws no arrow on a plain .form-control, so supply one.
+.editor-panel select.form-control {
+  padding-right: 42px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 14px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  cursor: pointer;
+
+  option {
+    background: #ffffff;
+    color: var(--ink);
+  }
+}
+
+// Photo field: a drop area showing the photo now on the card. The real file
+// input is stretched invisibly over all of it.
+.upload-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 9px 14px 9px 9px;
+  background-color: var(--panel-field);
+  border: 1.5px dashed #b9c4d8;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    background-color: rgba(21, 88, 201, 0.05);
+    border-color: rgba(21, 88, 201, 0.6);
+  }
+
+  &:has(input:focus-visible) {
+    border-color: var(--panel-focus);
+    box-shadow: 0 0 0 4px rgba(21, 88, 201, 0.14);
+  }
+
+  input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    opacity: 0;
+  }
+}
+
+.upload-thumb {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  background-color: #dbe4f0;
+  background-position: center;
+  background-size: cover;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.upload-copy {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.upload-title {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.upload-hint {
+  color: var(--panel-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.upload-action {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--blue);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  .icon-action {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.upload-field:hover .upload-action {
+  background: var(--panel-focus);
+  border-color: var(--panel-focus);
+  color: #ffffff;
+}
+
+.editor-divider {
+  flex: none;
+  height: 1px;
+  margin: 0 0 16px;
+  background: var(--panel-line);
+  border: 0;
+  opacity: 1;
+}
+
+.editor-panel .btn-download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  background: linear-gradient(180deg, #1f6bf0, #1456c4);
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition:
+    box-shadow 0.25s var(--ease-out),
+    filter 0.25s var(--ease-out),
+    transform 0.25s var(--ease-out);
+
+  .icon-action {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    background: linear-gradient(180deg, #1f6bf0, #1456c4);
+    color: #ffffff;
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    background: linear-gradient(180deg, #1f6bf0, #1456c4);
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    box-shadow:
+      0 0 0 3px #ffffff,
+      0 0 0 5px var(--panel-focus);
+  }
+
+  &:disabled {
+    cursor: progress;
+    opacity: 0.8;
+  }
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: btn-spin 0.7s linear infinite;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.editor-panel .editor-error {
+  margin: 12px 0 0;
+  padding: 9px 12px;
+  background: #fff1f3;
+  border: 1px solid #f7c6cf;
+  border-radius: 10px;
+  color: #b42343;
+  font-size: 13px;
+  text-align: center;
+}
+
+// Short windows (laptops): tighter spacing, so the longest form still fits.
+@media (min-width: 1200px) and (max-height: 940px) {
+  .panel-inner {
+    padding-top: 18px;
+  }
+
+  .panel-header {
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+
+    .back-link {
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      margin-bottom: 10px;
+    }
+  }
+
+  .editor-field {
+    margin-bottom: 12px;
+  }
+
+  .editor-panel .form-label {
+    margin-bottom: 6px;
+  }
+
+  .editor-panel .form-control {
+    min-height: 42px;
+    padding-top: 9px;
+    padding-bottom: 9px;
+  }
+
+  .editor-panel textarea.form-control {
+    min-height: 76px;
+  }
+
+  .upload-thumb {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.btn {
+  font-size: 14px;
+  letter-spacing: 0.4px;
+
+  &.btn-primary {
+    font-weight: 600;
+  }
+}
+
+// Cropper.js dims everything outside the crop box with a ".cropper-modal"
+// mask. The original design leaves that area undimmed; delete this rule to get
+// Cropper's default dimming back.
+.cropper-container .cropper-modal {
+  opacity: 1;
+  background: transparent;
+}
+
+// Named to stay clear of Cropper.js's own ".cropper-modal" class.
+.image-cropper-modal {
+  .modal-content {
+    overflow: hidden;
+    background: #11182b;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 28px 90px rgba(0, 0, 0, 0.45);
+    color: #ffffff;
+
+    .modal-header,
+    .modal-footer {
+      padding: 20px 24px;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-header {
+      .cropper-kicker {
+        color: #9eaff0;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.7px;
+        text-transform: uppercase;
+      }
+      .modal-title {
+        font-size: 22px;
+        font-weight: 800;
+      }
+    }
+
+    .modal-body {
+      padding: 24px;
+
+      .cropper-stage {
+        height: min(58vh, 520px);
+        min-height: 280px;
+        overflow: hidden;
+        background: #080d1d;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+
+        img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          max-width: none;
+          object-fit: contain;
+        }
+      }
+      .cropper-help {
+        margin: 15px 0 0;
+        color: #9da8c3;
+        font-size: 13px;
+        letter-spacing: 0.3px;
+      }
+    }
+
+    .btn-close {
+      filter: invert(1);
+    }
+  }
+}
+
+.wedding-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: url(/assets/images/templates/wedding-anniversary/wedding-anniversary.svg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 30px 30px 30px 42px;
+
+  .person-frame {
+    position: relative;
+    flex: 1;
+    min-height: 500px;
+    isolation: isolate;
+
+    img {
+      position: absolute;
+      z-index: 1;
+      width: 480px;
+      height: 470px;
+      top: 48%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center;
+
+      // keeps the photo strictly inside the circular area
+      clip-path: circle(50% at 50% 50%);
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: url(/assets/images/templates/wedding-anniversary/wedding-frame.svg)
+        center / contain no-repeat;
+      pointer-events: none;
+    }
+  }
+  .card-copy {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 20px;
+    height: 100%;
+
+    .frames-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+
+      .frames {
+        width: 100%;
+        max-width: 240px;
+      }
+
+      .date {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 8px;
+        color: #0b4c70;
+        font-size: 27px;
+        font-weight: 400;
+        letter-spacing: 0;
+        line-height: 1;
+        text-transform: capitalize;
+
+        strong {
+          color: #0a4867;
+          font-size: 1.15em;
+          font-weight: 900;
+        }
+
+        span {
+          font-weight: 500;
+        }
+      }
+    }
+    h2 {
+      // --font-caramel is provided by next/font in the root layout.
+      font-family: var(--font-caramel), cursive;
+      font-size: 122px;
+      color: #217cb0;
+      line-height: 0.8;
+      text-transform: capitalize;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+
+      > span:not(.ampersand) {
+        display: block;
+        text-transform: capitalize;
+      }
+
+      .ampersand {
+        color: #93b0c0;
+      }
+    }
+
+    .wish {
+      color: #000000;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      text-align: center;
+    }
+  }
+}
+
+.work-copy p {
+  width: 100%;
+  margin-top: 15px;
+  color: #ffffff;
+  font-size: 16px;
+  max-width: 570px;
+}
+
+.work-person-frame {
+  width: 350px;
+  height: 400px;
+  padding: 4px;
+  background: #4d8df4;
+  border-radius: 10px;
+  position: relative;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  .work-person-meta {
+    border: 2px solid #fff;
+    background: rgba(255, 255, 255, 0.9019607843);
+    position: absolute;
+    bottom: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 430px;
+    border-radius: 10px;
+    padding: 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    img {
+      width: 70px;
+      height: 70px;
+    }
+
+    .calendar-icon {
+      width: 22px;
+      height: 22px;
+    }
+
+    .work-person-details {
+      border-left: 1px solid #062260;
+      padding-left: 14px;
+
+      h2 {
+        margin-bottom: 5px;
+        letter-spacing: 0.3px;
+        font-size: 22px;
+        font-weight: 800;
+        color: #1a57eb;
+        text-transform: uppercase;
+      }
+
+      h5 {
+        font-size: 16px;
+        font-weight: 500;
+        color: #062260;
+        text-transform: capitalize;
+        border-bottom: 1px solid #062260;
+        padding-bottom: 8px;
+      }
+
+      h6 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 800;
+        color: #062260;
+        text-transform: capitalize;
+      }
+    }
+  }
+}
+
+.work-card {
+  background: url("/assets/images/templates/work-anniversary/work-anniversary.svg");
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  .work-copy {
+    img {
+      width: 420px;
+      height: auto;
+      margin-left: -50px;
+    }
+  }
+}
+
+.birthday-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: url("/assets/images/templates/birthday/birthday-card.svg") center /
+    cover no-repeat;
+
+  &::after {
+    position: absolute;
+    inset: 0 0 0 45%;
+    z-index: 1;
+    background: url("/assets/images/templates/birthday/birthday-circle.svg")
+      right center / 182% 100% no-repeat;
+    content: "";
+    pointer-events: none;
+  }
+
+  .person-frame {
+    position: absolute;
+    top: 11%;
+    right: 6%;
+    width: 47%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 50%;
+    z-index: 1;
+
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  // The Gilroy web fonts referenced here were never added to the repository,
+  // so these stacks have always rendered in the generic sans-serif fallback.
+  .card-copy {
+    h2 {
+      font-size: 50px;
+      color: #0256bd;
+      font-family: gilroy-semibold, sans-serif;
+      position: absolute;
+      text-transform: capitalize;
+      bottom: 33%;
+      left: 36px;
+    }
+
+    h6 {
+      font-size: 38px;
+      color: #fff;
+      font-family: gilroy-medium, sans-serif;
+      position: absolute;
+      bottom: 23.5%;
+      left: 36px;
+      margin: 0;
+      text-transform: capitalize;
+    }
+  }
+}
